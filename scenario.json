@@ -1,0 +1,112 @@
+{
+  "id": "linear-backlog-review",
+  "title": "Linear Backlog Review",
+  "prompt": "Review the sampled issues matching this project query. Group by status and urgency, note blocked work, and summarize one issue in detail before suggesting a review order.",
+  "instructions": "Search Linear using the supplied query and result limit, then read the selected issue by its returned identifier. State this is a bounded sample. Do not edit issue state, assign work, create comments, or infer dependencies not present in the returned records. Separate issue facts from your recommended ordering.",
+  "fixture_summary": "Synthetic Linear search returns three project issues; detail on one issue confirms its blocked dependency and acceptance criteria.",
+  "inputs": {
+    "query": "Project Atlas",
+    "limit": 3
+  },
+  "steps": [
+    {
+      "id": "search_atlas_issues",
+      "alias": "project_issues",
+      "integration": "linear",
+      "action": "search_issues",
+      "tool": "project_issues__search_issues",
+      "arguments": {
+        "query": "Project Atlas",
+        "limit": 3
+      },
+      "records": [
+        {
+          "id": "LIN-201",
+          "app": "Linear",
+          "title": "Add export audit log",
+          "detail": "Synthetic issue: in progress, high priority, waiting on event schema.",
+          "url": "https://example.com/records/LIN-201",
+          "issue_id": "LIN-201",
+          "status": "In Progress",
+          "priority": "High",
+          "blocked": true,
+          "project": "Atlas"
+        },
+        {
+          "id": "LIN-202",
+          "app": "Linear",
+          "title": "Document retention edge cases",
+          "detail": "Synthetic issue: todo, medium priority, no dependency reported.",
+          "url": "https://example.com/records/LIN-202",
+          "issue_id": "LIN-202",
+          "status": "Todo",
+          "priority": "Medium",
+          "blocked": false,
+          "project": "Atlas"
+        },
+        {
+          "id": "LIN-203",
+          "app": "Linear",
+          "title": "Fix empty CSV header row",
+          "detail": "Synthetic issue: done, low priority, completed this week.",
+          "url": "https://example.com/records/LIN-203",
+          "issue_id": "LIN-203",
+          "status": "Done",
+          "priority": "Low",
+          "blocked": false,
+          "project": "Atlas"
+        }
+      ]
+    },
+    {
+      "id": "read_audit_issue",
+      "alias": "project_issues",
+      "integration": "linear",
+      "action": "get_issue",
+      "tool": "project_issues__get_issue",
+      "arguments": {
+        "issue_id": "LIN-201"
+      },
+      "records": [
+        {
+          "id": "LIN-201",
+          "app": "Linear",
+          "title": "Add export audit log",
+          "detail": "Full synthetic issue: event schema must include export format and actor ID. Acceptance requires a test for failed export attempts. The upstream schema issue remains open.",
+          "url": "https://example.com/records/LIN-201",
+          "issue_id": "LIN-201",
+          "status": "In Progress",
+          "priority": "High",
+          "blocked": true,
+          "project": "Atlas",
+          "acceptance_criteria_present": true
+        }
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "name": "sampled_issues",
+      "op": "count"
+    },
+    {
+      "name": "blocked_issues",
+      "op": "count",
+      "where": {
+        "blocked": true
+      }
+    },
+    {
+      "name": "issues_with_acceptance_criteria",
+      "op": "count",
+      "where": {
+        "acceptance_criteria_present": true
+      }
+    }
+  ],
+  "expected_metrics": {
+    "sampled_issues": 3,
+    "blocked_issues": 1,
+    "issues_with_acceptance_criteria": 1
+  }
+}
